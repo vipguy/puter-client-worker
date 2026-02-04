@@ -106,6 +106,9 @@ File management commands (ls, mkdir, rm, etc.) are not supported on Windows due 
 ⚠️ **Delete Operations Use Force Flag**
 All delete operations (apps, sites) automatically use the `-f` (force) flag to bypass confirmation prompts. This is a workaround for a Puter CLI bug where inquirer confirmation prompts break stdin in shell mode, causing the CLI to become unresponsive.
 
+⚠️ **Puter CLI Performance Issues**
+The Puter CLI has known performance issues with `rm` and `pull` commands due to `findMatchingFiles` recursively traversing the entire filesystem. These commands should only need the absolute file path, not recursive traversal. This is a Puter CLI design issue, not specific to this GUI. For better performance, use the Puter web interface or SDK for file operations.
+
 ## Project Structure
 
 ```
