@@ -45,7 +45,7 @@ A modern graphical interface for the Puter Cloud Platform CLI, built with Node.j
 npm install
 ```
 
-2. (Optional) Copy `.env` to `.env` if you want to use API key authentication:
+2. (Optional) Copy `.env.example` to `.env` if you want to use API key authentication:
 ```bash
 cp .env.example .env
 # Edit .env and add your PUTER_API_KEY
@@ -111,8 +111,10 @@ puter-cli-gui-client/
 ├── puter-gui-v2.html      # Main HTML interface
 ├── puter-gui-v2.js        # Client-side JavaScript
 ├── package.json           # Node.js dependencies
-├── .env                   # Environment variables (optional)
-└── README.md             # This file
+├── .env.example           # Environment variables template
+├── .gitignore             # Git ignore rules
+├── README.md              # This file
+└── COLOR-GUIDELINES.md    # UI/Terminal color standards
 ```
 
 ## API Endpoints
@@ -179,4 +181,3 @@ For issues related to:
 ---
 
 **Powered by Puter** - https://developer.puter.com
-
