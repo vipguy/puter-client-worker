@@ -103,6 +103,9 @@ router.get('/api/hello', async (event) => {
 ⚠️ **File Operations Not Available**
 File management commands (ls, mkdir, rm, etc.) are not supported on Windows due to a known bug in the Puter CLI interactive shell. Please use the Puter web interface at https://puter.com for file operations.
 
+⚠️ **Delete Operations Use Force Flag**
+All delete operations (apps, sites) automatically use the `-f` (force) flag to bypass confirmation prompts. This is a workaround for a Puter CLI bug where inquirer confirmation prompts break stdin in shell mode, causing the CLI to become unresponsive.
+
 ## Project Structure
 
 ```
