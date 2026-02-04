@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puter CLI GUI v2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #28a745;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            padding: 20px;
+        }
+
+        .nav-item {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            background: #e9ecef;
+        }
+
+        .nav-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .content-area {
+            padding: 30px;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .terminal {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .terminal-line {
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+
+        .terminal-prompt {
+            color: #4ec9b0;
+        }
+
+        .terminal-error {
+            color: #f48771;
+        }
+
+        .terminal-success {
+            color: #89d185;
+        }
+
+        .terminal-warning {
+            color: #dcdcaa;
+        }
+
+        .file-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .file-item {
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .file-item:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .file-icon {
+            margin-right: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .card h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: #495057;
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb-item {
+            color: #667eea;
+            cursor: pointer;
+        }
+
+        .breadcrumb-item:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-separator {
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Puter CLI GUI v2</h1>
+            <p>Enhanced Graphical Interface for Puter Cloud Platform</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Not Connected</span>
+            </div>
+            <div>
+                <span id="userInfo">Not logged in</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="nav-item active" data-section="auth">
+                    <span>🔐</span> Authentication
+                </div>
+                <div class="nav-item" data-section="files">
+                    <span>📁</span> File Manager
+                </div>
+                <div class="nav-item" data-section="sites">
+                    <span>🌐</span> Static Sites
+                </div>
+                <div class="nav-item" data-section="apps">
+                    <span>📱</span> Applications
+                </div>
+                <div class="nav-item" data-section="workers">
+                    <span>⚙️</span> Workers
+                </div>
+                <div class="nav-item" data-section="terminal">
+                    <span>💻</span> Terminal
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="alert" id="alertBox"></div>
+
+                <!-- Authentication Section -->
+                <div class="section active" id="auth">
+                    <h2>Authentication</h2>
+                    <div class="card">
+                        <h3>Login to Puter</h3>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="saveCredentials">
+                                Save credentials to .env file
+                            </label>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="login()">
+                                <span id="loginBtnText">Login</span>
+                            </button>
+                            <button class="btn btn-danger" onclick="logout()">Logout</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Account Information</h3>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="getUserInfo()">Get User Info</button>
+                            <button class="btn btn-primary" onclick="diskUsage()">Disk Usage</button>
+                            <button class="btn btn-primary" onclick="getUsage()">Usage Stats</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Manager Section -->
+                <div class="section" id="files">
+                    <h2>File Manager</h2>
+                    
+                    <div class="breadcrumb" id="breadcrumb">
+                        <span class="breadcrumb-item" onclick="navigateTo('/')">Home</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>Current Directory: <span id="currentPath">/</span></h3>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="listFiles()">
+                                <span id="listFilesBtnText">Refresh</span>
+                            </button>
+                            <button class="btn btn-success" onclick="showCreateModal('dir')">New Folder</button>
+                            <button class="btn btn-success" onclick="showCreateModal('file')">New File</button>
+                        </div>
+                    </div>
+
+                    <ul class="file-list" id="fileList">
+                        <li class="file-item">Click "Refresh" to load files</li>
+                    </ul>
+                </div>
+
+                <!-- Static Sites Section -->
+                <div class="section" id="sites">
+                    <h2>Static Sites</h2>
+                    <div class="card">
+                        <h3>Create New Site</h3>
+                        <div class="form-group">
+                            <label>Site Name *</label>
+                            <input type="text" id="siteName" placeholder="my-awesome-site">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Subdomain (optional)</label>
+                                <input type="text" id="siteSubdomain" placeholder="custom-subdomain">
+                            </div>
+                            <div class="form-group">
+                                <label>Directory Path</label>
+                                <input type="text" id="siteDir" placeholder="./" value="./">
+                            </div>
+                        </div>
+                        <button class="btn btn-success" onclick="createSite()">
+                            <span id="createSiteBtnText">Create Site</span>
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <h3>Deploy Site</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Subdomain</label>
+                                <input type="text" id="deploySubdomain" placeholder="my-site">
+                            </div>
+                            <div class="form-group">
+                                <label>Directory</label>
+                                <input type="text" id="deployDir" placeholder="./">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="deploySite()">Deploy</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>Manage Sites</h3>
+                        <button class="btn btn-primary" onclick="listSites()">
+                            <span id="listSitesBtnText">List All Sites</span>
+                        </button>
+                    </div>
+                    <ul class="file-list" id="siteList"></ul>
+                </div>
+
+                <!-- Applications Section -->
+                <div class="section" id="apps">
+                    <h2>Applications</h2>
+                    <div class="card">
+                        <h3>Create New App</h3>
+                        <div class="form-group">
+                            <label>App Name *</label>
+                            <input type="text" id="appName" placeholder="my-app">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Directory (optional)</label>
+                                <input type="text" id="appDir" placeholder="./app">
+                            </div>
+                            <div class="form-group">
+                                <label>URL (optional)</label>
+                                <input type="text" id="appUrl" placeholder="https://example.com">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description (optional)</label>
+                            <textarea id="appDescription" placeholder="My awesome application"></textarea>
+                        </div>
+                        <button class="btn btn-success" onclick="createApp()">
+                            <span id="createAppBtnText">Create App</span>
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3>Manage Apps</h3>
+                        <div class="form-group">
+                            <label>Period</label>
+                            <select id="appPeriod">
+                                <option value="">All time</option>
+                                <option value="day">Today</option>
+                                <option value="week">This week</option>
+                                <option value="month">This month</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="listApps()">
+                            <span id="listAppsBtnText">List Apps</span>
+                        </button>
+                    </div>
+                    <ul class="file-list" id="appList"></ul>
+                </div>
+
+                <!-- Workers Section -->
+                <div class="section" id="workers">
+                    <h2>Serverless Workers</h2>
+                    <div class="card">
+                        <h3>Create New Worker</h3>
+                        <div class="form-group">
+                            <label>Worker Name *</label>
+                            <input type="text" id="workerName" placeholder="my-api-worker">
+                        </div>
+                        <div class="form-group">
+                            <label>Worker Code (JavaScript)</label>
+                            <textarea id="workerCode" placeholder="// Example worker code&#10;router.get('/api/hello', async (event) => {&#10;    return 'Hello from worker!';&#10;});" style="min-height: 200px; font-family: 'Courier New', monospace;"></textarea>
+                        </div>
+                        <button class="btn btn-success" onclick="createWorker()">
+                            <span id="createWorkerBtnText">Create & Deploy Worker</span>
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3>Manage Workers</h3>
+                        <button class="btn btn-primary" onclick="listWorkers()">
+                            <span id="listWorkersBtnText">List All Workers</span>
+                        </button>
+                    </div>
+                    <ul class="file-list" id="workerList"></ul>
+                </div>
+
+                <!-- Terminal Section -->
+                <div class="section" id="terminal">
+                    <h2>Terminal</h2>
+                    <div class="card">
+                        <h3>Execute Puter Commands</h3>
+                        <p style="margin-bottom: 15px; color: #6c757d; font-size: 14px;">
+                            Enter any Puter command below (without the 'puter' prefix). 
+                            Examples: <code>apps</code>, <code>sites</code>, <code>ls</code>, <code>whoami</code>, <code>df</code>
+                        </p>
+                        <div class="form-group">
+                            <label>Command</label>
+                            <input type="text" id="terminalInput" placeholder="Type command here (e.g., apps, sites, ls, whoami)" style="font-family: 'Courier New', monospace;">
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="executeCommand()">Execute</button>
+                            <button class="btn btn-danger" onclick="clearTerminal()">Clear Terminal</button>
+                        </div>
+                        <div style="margin-top: 15px; padding: 10px; background: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 4px;">
+                            <strong>💡 Quick Commands:</strong>
+                            <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="btn btn-sm" style="background: #e9ecef; color: #495057;" onclick="document.getElementById('terminalInput').value='whoami'; executeCommand();">whoami</button>
+                                <button class="btn btn-sm" style="background: #e9ecef; color: #495057;" onclick="document.getElementById('terminalInput').value='df'; executeCommand();">df</button>
+                                <button class="btn btn-sm" style="background: #e9ecef; color: #495057;" onclick="document.getElementById('terminalInput').value='ls'; executeCommand();">ls</button>
+                                <button class="btn btn-sm" style="background: #e9ecef; color: #495057;" onclick="document.getElementById('terminalInput').value='pwd'; executeCommand();">pwd</button>
+                                <button class="btn btn-sm" style="background: #e9ecef; color: #495057;" onclick="document.getElementById('terminalInput').value='apps'; executeCommand();">apps</button>
+                                <button class="btn btn-sm" style="background: #e9ecef; color: #495057;" onclick="document.getElementById('terminalInput').value='sites'; executeCommand();">sites</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="terminal" id="terminalOutput">
+                        <div class="terminal-line">
+                            <span class="terminal-prompt">$</span> Welcome to Puter CLI Terminal v2
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="createModalTitle">Create New</h3>
+            </div>
+            <div class="form-group">
+                <label id="createModalLabel">Name</label>
+                <input type="text" id="createModalInput" placeholder="Enter name">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="handleCreate()">Create</button>
+                <button class="btn" onclick="closeModal('createModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Upload File</h3>
+            </div>
+            <div class="form-group">
+                <label>Select File</label>
+                <input type="file" id="fileUploadInput">
+            </div>
+            <div class="form-group">
+                <label>Remote Path (optional)</label>
+                <input typ
+e="text" id="uploadRemotePath" placeholder="/">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="handleUpload()">Upload</button>
+                <button class="btn" onclick="closeModal('uploadModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="puter-gui-v2.js"></script>
+</body>
+</html>
