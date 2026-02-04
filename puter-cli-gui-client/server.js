@@ -652,7 +652,8 @@ app.delete('/api/site', async (req, res) => {
             return res.json({ success: false, error: 'Site UID is required' });
         }
         
-        const result = await executePuterCommand(`site:delete "${uid}"`);
+        // Always use -f flag to avoid inquirer confirmation prompts that break stdin
+        const result = await executePuterCommand(`site:delete -f "${uid}"`);
         res.json({ 
             success: true, 
             output: result.stdout || `Site '${uid}' deleted successfully` 
@@ -742,7 +743,8 @@ app.delete('/api/app', async (req, res) => {
             return res.json({ success: false, error: validation.error });
         }
         
-        const cmd = force === 'true' ? `app:delete -f "${validation.name}"` : `app:delete "${validation.name}"`;
+        // Always use -f flag to avoid inquirer confirmation prompts that break stdin
+        const cmd = `app:delete -f "${validation.name}"`;
         const result = await executePuterCommand(cmd);
         res.json({ 
             success: true, 
